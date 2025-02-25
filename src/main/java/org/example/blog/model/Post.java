@@ -11,6 +11,15 @@ import java.util.Set;
 @NoArgsConstructor
 public class Post {
 
+    public Post(long id, String title, String content, byte[] images, LocalDateTime created, LocalDateTime updated) {
+        this.id = id;
+        this.title = title;
+        this.content = content;
+        this.image = images;
+        this.created = created;
+        this.updated = updated;
+    }
+
     private Long id;
     private String title;
     private String content;

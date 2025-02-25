@@ -6,6 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public class PostRepoImpl implements PostRepo {
+
+    public static final String SAVE_QUERY = "INSERT INTO POSTS (title, content, image) VALUES (?, ?, ?) RETURNING ID";
+
     @Override
     public void save(Post post) {
 

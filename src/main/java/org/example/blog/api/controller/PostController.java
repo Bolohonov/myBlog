@@ -9,6 +9,7 @@ import org.example.blog.service.TagService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -22,43 +23,43 @@ public class PostController {
     private final PostService postService;
     private final TagService tagService;
 
-    @PostMapping(path = "/post")
-    public String savePost(@ModelAttribute PostRequest postDto) {
-        postService.save(postDto);
+    @PostMapping(path = "/post", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public String savePost(@ModelAttribute PostRequest request) {
+        postService.save(request);
         return "redirect:/api/blog";
     }
 
-    @GetMapping(path = "/post/{id}")
+    @GetMapping("/post/{id}")
     public String getPost(@PathVariable("id") Long id, Model model) {
         PostResponse post = postService.getById(id);
         model.addAttribute("post", post);
         return "post";
     }
 
-    @DeleteMapping(path = "/post/{id}")
+    @DeleteMapping( "/post/{id}")
     public String deletePost(@PathVariable("id") Long id) {
         postService.removeById(id);
         return "redirect:/api/blog";
     }
 
-    @PutMapping(path = "/post/{id}/update")
+    @PutMapping( "/post/{id}/update")
     public String update(@ModelAttribute PostRequest request, @PathVariable("id") Long id) {
         postService.update(id, request);
         return "redirect:/api/blog";
     }
 
-    @PostMapping(path = "/post/{id}/comment")
+    @PostMapping( "/post/{id}/comment")
     public String addComment(@PathVariable("id") Long id, @ModelAttribute CommentRequest comment) {
         postService.addComment(id, comment);
         return "redirect:/api/blog/post/" + id;
     }
 
-    @DeleteMapping(path = "/post/{id}/comment/{commentId}")
+    @DeleteMapping( "/post/{id}/comment/{commentId}")
     public void deleteComment(@PathVariable("id") Long id, @PathVariable("commentId") Long commentId) {
         postService.deleteComment(id, commentId);
     }
 
-    @GetMapping(path = "/post/{id}/like")
+    @GetMapping( "/post/{id}/like")
     public void likePost(@PathVariable("id") Long id) {
         postService.like(id);
     }
