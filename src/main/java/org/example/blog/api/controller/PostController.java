@@ -1,10 +1,10 @@
 package org.example.blog.api.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.blog.api.request.CommentRequest;
 import org.example.blog.api.request.PostRequest;
 import org.example.blog.api.response.PostResponse;
 import org.example.blog.service.PostService;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +19,7 @@ public class PostController {
     @PostMapping(path = "/post")
     public String savePost(@ModelAttribute PostRequest postDto) {
         postService.save(postDto);
-        return "redirect:/blog";
+        return "redirect:/api/blog";
     }
 
     @GetMapping(path = "/post/{id}")
@@ -32,12 +32,28 @@ public class PostController {
     @DeleteMapping(path = "/post/{id}")
     public String deletePost(@PathVariable("id") Long id) {
         postService.removeById(id);
-        return "redirect:/blog";
+        return "redirect:/api/blog";
     }
 
     @PutMapping(path = "/post/{id}/update")
     public String update(@ModelAttribute PostRequest request, @PathVariable("id") Long id) {
         postService.update(id, request);
-        return "redirect:/blog";
+        return "redirect:/api/blog";
+    }
+
+    @PostMapping(path = "/post/{id}/comment")
+    public String addComment(@PathVariable("id") Long id, @ModelAttribute CommentRequest comment) {
+        postService.addComment(id, comment);
+        return "redirect:/api/blog/post/" + id;
+    }
+
+    @DeleteMapping(path = "/post/{id}/comment/{commentId}")
+    public void deleteComment(@PathVariable("id") Long id, @PathVariable("commentId") Long commentId) {
+        postService.deleteComment(id, commentId);
+    }
+
+    @GetMapping(path = "/post/{id}/like")
+    public void likePost(@PathVariable("id") Long id) {
+        postService.like(id);
     }
 }
