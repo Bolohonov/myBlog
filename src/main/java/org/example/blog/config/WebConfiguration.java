@@ -7,5 +7,5 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebMvc
-@ComponentScan(basePackages = "org.example.blog.controller")
+@ComponentScan(basePackages = "org.example.blog.api.controller")
 public class WebConfiguration implements WebMvcConfigurer {}
