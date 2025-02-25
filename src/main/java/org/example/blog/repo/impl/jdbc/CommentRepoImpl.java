@@ -17,7 +17,7 @@ public class CommentRepoImpl implements CommentRepo {
     }
 
     @Override
-    public List<Comment> getByPostIds(List<Long> postIds) {
+    public List<Comment> findByPostIds(List<Long> postIds) {
         return List.of();
     }
 }

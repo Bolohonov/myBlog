@@ -29,6 +29,16 @@ public class TagRepoImpl implements TagRepo {
     public List<Tag> getOrCreate(Set<String> tagNames) {
     }
 
+    @Override
+    public List<Tag> findAll() {
+        return List.of();
+    }
+
+    @Override
+    public List<Tag> findByPostIds(List<Long> postIds) {
+        return List.of();
+    }
+
     private List<Tag> findByNameInIgnoreCase(Set<String> tagNames) {
     }
 }

@@ -5,11 +5,19 @@ import org.example.blog.api.mapper.PostMapper;
 import org.example.blog.api.request.CommentRequest;
 import org.example.blog.api.request.PostRequest;
 import org.example.blog.api.response.PostResponse;
+import org.example.blog.model.Comment;
+import org.example.blog.model.Like;
 import org.example.blog.model.Post;
+import org.example.blog.model.Tag;
 import org.example.blog.repo.PostRepo;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -58,4 +66,20 @@ public class PostService {
     public void like(Long id) {
         likeService.addLike(postRepository.getById(id));
     }
+
+    public Page<PostResponse> getPosts(Pageable pageable) {
+        Page<Post> posts = postRepository.findAll(pageable);
+        List<Long> postIds = posts.stream().map(Post::getId).toList();
+        Map<Long, List<Tag>> tags = tagService.getByPostIds(postIds);
+        Map<Long, List<Comment>> comments = commentService.getByPostIds(postIds);
+        Map<Long, List<Like>> likes = likeService.getByPostIds(postIds);
+        posts.forEach(post -> {
+            post.getTags().addAll(tags.getOrDefault(post.getId(), Collections.emptyList()));
+            post.getComments().addAll(comments.getOrDefault(post.getId(), Collections.emptyList()));
+            post.getLikes().addAll(likes.getOrDefault(post.getId(), Collections.emptyList()));
+        });
+        return posts.map(postMapper::toResponse);
+    }
+
+
 }

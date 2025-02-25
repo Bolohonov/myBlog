@@ -9,5 +9,5 @@ import java.util.List;
 public interface CommentRepo {
     void save(Comment comment);
     void delete(Long id);
-    List<Comment> getByPostIds(List<Long> postIds);
+    List<Comment> findByPostIds(List<Long> postIds);
 }

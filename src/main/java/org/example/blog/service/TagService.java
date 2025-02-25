@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TagService {
     private final TagRepo tagRepo;
+    private final TagMapper tagMapper;
 
     public Set<Tag> save(String tags) {
         Set<String> tagsFrom = Arrays.stream(tags.split(","))
@@ -21,5 +22,16 @@ public class TagService {
                 .map(String::toLowerCase)
                 .collect(Collectors.toSet());
         return new HashSet<>(tagRepo.getOrCreate(tagsFrom));
+    }
+
+    public List<String> getAllTags() {
+        return  tagMapper.toResponses(tagRepo.findAll()).stream()
+                .map(TagResponse::getName)
+                .collect(Collectors.toList());
+    }
+
+    public Map<Long, List<Tag>> getByPostIds(List<Long> postIds) {
+        List<Tag> tags = tagRepo.findByPostIds(postIds);
+        return tags.stream().collect(Collectors.groupingBy(Tag::getPostId));
     }
 }

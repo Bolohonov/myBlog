@@ -10,4 +10,6 @@ import java.util.Set;
 public interface TagRepo {
     List<Tag> save(List<Tag> tags);
     List<Tag> getOrCreate(Set<String> tagNames);
+    List<Tag> findAll();
+    List<Tag> findByPostIds(List<Long> postIds);
 }

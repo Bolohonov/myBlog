@@ -27,7 +27,7 @@ public class CommentService {
     }
 
     public Map<Long, List<Comment>> getByPostIds(List<Long> postIds) {
-        List<Comment> comments = commentRepo.getByPostIds(postIds);
+        List<Comment> comments = commentRepo.findByPostIds(postIds);
         return comments.stream().collect(Collectors.groupingBy(Comment::getPostId));
     }
 }

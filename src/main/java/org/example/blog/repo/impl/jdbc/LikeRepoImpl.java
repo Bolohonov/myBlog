@@ -12,7 +12,7 @@ public class LikeRepoImpl implements LikeRepo {
     }
 
     @Override
-    public List<Like> getByPostIds(List<Long> postIds) {
+    public List<Like> findByPostIds(List<Long> postIds) {
         return List.of();
     }
 }

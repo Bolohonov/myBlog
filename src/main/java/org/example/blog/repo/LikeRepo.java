@@ -8,5 +8,5 @@ import java.util.List;
 @Repository
 public interface LikeRepo {
     void save(Like like);
-    List<Like> getByPostIds(List<Long> postIds);
+    List<Like> findByPostIds(List<Long> postIds);
 }
