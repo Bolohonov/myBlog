@@ -72,6 +72,6 @@ public class PostController {
         model.addAttribute("currentPage", posts.getNumber() + 1);
         model.addAttribute("totalPages", posts.getTotalPages());
         model.addAttribute("tags", tags);
-        return "posts-feed";
+        return "feed";
     }
 }
