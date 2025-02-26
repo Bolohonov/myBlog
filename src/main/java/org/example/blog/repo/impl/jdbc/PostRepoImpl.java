@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,15 +65,7 @@ public class PostRepoImpl implements PostRepo {
     public Post getById(Long id) {
         return template.queryForObject(
                 FIND_BY_ID,
-                (rs, rowNum) ->
-                        new Post(
-                                rs.getLong("id"),
-                                rs.getString("title"),
-                                rs.getString("content"),
-                                rs.getBytes("image"),
-                                rs.getTimestamp("created_at").toLocalDateTime(),
-                                rs.getTimestamp("updated_at").toLocalDateTime()
-                        ),
+                this::mapToPost,
                 id
         );
     }
@@ -119,15 +112,7 @@ public class PostRepoImpl implements PostRepo {
 
         List<Post> posts = template.query(
                 FIND_ALL,
-                (rs, rowNum) ->
-                        new Post(
-                                SqlUtils.getLong(rs, "id"),
-                                SqlUtils.getStringOrElseEmpty(rs, "title"),
-                                SqlUtils.getStringOrElseEmpty(rs, "content"),
-                                rs.getBytes("image"),
-                                SqlUtils.getLocalDateTime(rs, "created"),
-                                SqlUtils.getLocalDateTime(rs, "updated")
-                        ),
+                this::mapToPost,
                 limit,
                 offset
         );
@@ -138,5 +123,16 @@ public class PostRepoImpl implements PostRepo {
             size = 0;
         }
         return new PageImpl<>(posts, pageable, size);
+    }
+
+    Post mapToPost(ResultSet rs, int rowNumber) throws SQLException {
+        return new Post(
+                SqlUtils.getLong(rs, "id"),
+                SqlUtils.getStringOrElseEmpty(rs, "title"),
+                SqlUtils.getStringOrElseEmpty(rs, "content"),
+                rs.getBytes("image"),
+                SqlUtils.getLocalDateTime(rs, "created"),
+                SqlUtils.getLocalDateTime(rs, "updated")
+        );
     }
 }
