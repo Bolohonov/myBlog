@@ -15,7 +15,6 @@ import java.util.List;
 @Repository
 @RequiredArgsConstructor
 public class CommentRepoImpl implements CommentRepo {
-
     private static final String SAVE_COMMENT = "INSERT INTO COMMENTS (post_id, content) VALUES (?, ?)";
     private static final String DELETE_COMMENT = "DELETE FROM COMMENTS WHERE id = ?";
     private static final String FIND_BY_POST_ID = """
@@ -24,8 +23,8 @@ public class CommentRepoImpl implements CommentRepo {
             WHERE C.post_id IN (%s)
             """;
 
-
     private final JdbcTemplate template;
+
     @Override
     public void save(Comment comment) {
         template.update(

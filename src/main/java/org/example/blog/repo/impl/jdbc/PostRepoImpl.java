@@ -25,7 +25,6 @@ import java.util.List;
 @Repository
 @RequiredArgsConstructor
 public class PostRepoImpl implements PostRepo {
-
     private static final String SAVE_QUERY = """
             INSERT INTO POSTS (title, content, image) VALUES (?, ?, ?) RETURNING ID
             """;

@@ -15,7 +15,6 @@ import java.util.List;
 @Repository
 @RequiredArgsConstructor
 public class LikeRepoImpl implements LikeRepo {
-
     private static final String SAVE_LIKE = "INSERT INTO LIKES (post_id, user_id) VALUES (?, ?)";
     private static final String FIND_BY_POST_ID = """
             SELECT l.*

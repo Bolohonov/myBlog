@@ -56,6 +56,7 @@ public class PostService {
         commentService.save(comment, postRepo.getById(id));
     }
 
+    @Transactional
     public void deleteComment(Long id, Long commentId) {
         Post post = postRepo.getById(id);
         if (!Objects.equals(post, null) && !CollectionUtils.isEmpty(post.getComments())) {

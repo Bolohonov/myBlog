@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 @Repository
 @RequiredArgsConstructor
 public class TagRepoImpl implements TagRepo {
-
     private static final int MAX_BATCH_SIZE = 500;
 
     private static final String SAVE_POST_TAGS = """
