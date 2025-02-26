@@ -1,4 +1,4 @@
-package org.example.blog.api.mapper;
+package org.example.blog.mapper;
 
 import org.example.blog.api.request.CommentRequest;
 import org.example.blog.model.Comment;

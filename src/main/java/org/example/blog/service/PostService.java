@@ -1,7 +1,7 @@
 package org.example.blog.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.blog.api.mapper.PostMapper;
+import org.example.blog.mapper.PostMapper;
 import org.example.blog.api.request.CommentRequest;
 import org.example.blog.api.request.PostRequest;
 import org.example.blog.api.response.PostResponse;
@@ -23,38 +23,38 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class PostService {
-    private final PostRepo postRepository;
+    private final PostRepo postRepo;
     private final PostMapper postMapper;
     private final CommentService commentService;
     private final LikeService likeService;
     private final TagService tagService;
 
     public void save(PostRequest request) {
-        postRepository.save(postMapper.toPost(request));
+        postRepo.save(postMapper.toPost(request));
     }
 
     public PostResponse getById(Long id) {
-        return postMapper.toResponse(postRepository.getById(id));
+        return postMapper.toResponse(postRepo.getById(id));
     }
 
     public void removeById(Long id) {
-        postRepository.deleteById(id);
+        postRepo.deleteById(id);
     }
 
     public void update(Long id, PostRequest request) {
-        Post post = postRepository.getById(id);
+        Post post = postRepo.getById(id);
         post.setTitle(request.getTitle());
         post.setContent(request.getContent());
         post.setTags(tagService.save(request.getTags()));
-        postRepository.update(post);
+        postRepo.update(post);
     }
 
     public void addComment(Long id, CommentRequest comment) {
-        commentService.save(comment, postRepository.getById(id));
+        commentService.save(comment, postRepo.getById(id));
     }
 
     public void deleteComment(Long id, Long commentId) {
-        Post post = postRepository.getById(id);
+        Post post = postRepo.getById(id);
         if (!Objects.equals(post, null) && !CollectionUtils.isEmpty(post.getComments())) {
             post.getComments().stream()
                     .filter(comment -> comment.getId().equals(commentId))
@@ -64,11 +64,11 @@ public class PostService {
     }
 
     public void like(Long id) {
-        likeService.addLike(postRepository.getById(id));
+        likeService.addLike(postRepo.getById(id));
     }
 
     public Page<PostResponse> getPosts(Pageable pageable) {
-        Page<Post> posts = postRepository.findAll(pageable);
+        Page<Post> posts = postRepo.findAll(pageable);
         List<Long> postIds = posts.stream().map(Post::getId).toList();
         Map<Long, List<Tag>> tags = tagService.getByPostIds(postIds);
         Map<Long, List<Comment>> comments = commentService.getByPostIds(postIds);

@@ -1,4 +1,4 @@
-package org.example.blog.api.mapper;
+package org.example.blog.mapper;
 
 import org.example.blog.api.response.TagResponse;
 import org.example.blog.model.Tag;

@@ -1,7 +1,7 @@
 package org.example.blog.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.blog.api.mapper.TagMapper;
+import org.example.blog.mapper.TagMapper;
 import org.example.blog.api.response.TagResponse;
 import org.example.blog.model.Tag;
 import org.example.blog.repo.TagRepo;
