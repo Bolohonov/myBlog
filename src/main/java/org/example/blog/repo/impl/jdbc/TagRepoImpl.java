@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -27,6 +28,19 @@ public class TagRepoImpl implements TagRepo {
 
     @Override
     public List<Tag> getOrCreate(Set<String> tagNames) {
+        List<Tag> existedTags = this.findByNameInIgnoreCase(tagNames);
+        Set<String> existedTagNames = existedTags.stream().map(Tag::getName).collect(Collectors.toSet());
+        List<Tag> newTags = new ArrayList<>();
+        tagNames.forEach(t -> {
+            if (!existedTagNames.contains(t)) {
+                Tag tag = new Tag();
+                tag.setName(t);
+                newTags.add(tag);
+            }
+        });
+        this.save(newTags);
+        newTags.addAll(existedTags);
+        return newTags;
     }
 
     @Override
