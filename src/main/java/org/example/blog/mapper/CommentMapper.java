@@ -1,6 +1,6 @@
 package org.example.blog.mapper;
 
-import org.example.blog.api.request.CommentRequest;
+import org.example.blog.controller.request.CommentRequest;
 import org.example.blog.model.Comment;
 import org.example.blog.model.Post;
 import org.mapstruct.Mapper;

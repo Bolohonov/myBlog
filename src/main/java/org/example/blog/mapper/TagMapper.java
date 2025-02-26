@@ -1,6 +1,6 @@
 package org.example.blog.mapper;
 
-import org.example.blog.api.response.TagResponse;
+import org.example.blog.controller.response.TagResponse;
 import org.example.blog.model.Tag;
 import org.mapstruct.Mapper;
 

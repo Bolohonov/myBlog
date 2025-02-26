@@ -1,4 +1,4 @@
-package org.example.blog.api.response;
+package org.example.blog.controller.response;
 
 import lombok.Builder;
 import lombok.Getter;

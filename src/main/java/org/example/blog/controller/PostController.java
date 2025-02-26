@@ -1,9 +1,9 @@
-package org.example.blog.api.controller;
+package org.example.blog.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.blog.api.request.CommentRequest;
-import org.example.blog.api.request.PostRequest;
-import org.example.blog.api.response.PostResponse;
+import org.example.blog.controller.request.CommentRequest;
+import org.example.blog.controller.request.PostRequest;
+import org.example.blog.controller.response.PostResponse;
 import org.example.blog.service.PostService;
 import org.example.blog.service.TagService;
 import org.springframework.data.domain.Page;

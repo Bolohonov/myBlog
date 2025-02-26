@@ -2,9 +2,9 @@ package org.example.blog.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.blog.mapper.PostMapper;
-import org.example.blog.api.request.CommentRequest;
-import org.example.blog.api.request.PostRequest;
-import org.example.blog.api.response.PostResponse;
+import org.example.blog.controller.request.CommentRequest;
+import org.example.blog.controller.request.PostRequest;
+import org.example.blog.controller.response.PostResponse;
 import org.example.blog.model.Comment;
 import org.example.blog.model.Like;
 import org.example.blog.model.Post;

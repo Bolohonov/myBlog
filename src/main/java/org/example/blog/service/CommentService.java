@@ -2,7 +2,7 @@ package org.example.blog.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.blog.mapper.CommentMapper;
-import org.example.blog.api.request.CommentRequest;
+import org.example.blog.controller.request.CommentRequest;
 import org.example.blog.model.Comment;
 import org.example.blog.model.Post;
 import org.example.blog.repo.CommentRepo;
