@@ -1,5 +1,6 @@
 package org.example.blog.repo.impl.jdbc;
 
+import lombok.RequiredArgsConstructor;
 import org.example.blog.model.Post;
 import org.example.blog.model.Tag;
 import org.example.blog.repo.PostRepo;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Repository
+@RequiredArgsConstructor
 public class PostRepoImpl implements PostRepo {
 
     private static final String SAVE_QUERY = """
@@ -48,10 +50,6 @@ public class PostRepoImpl implements PostRepo {
     private static final String DELETE_BY_ID = "DELETE FROM POSTS P WHERE P.id = ?";
 
     private final JdbcTemplate template;
-
-    public PostRepoImpl(JdbcTemplate template) {
-        this.template = template;
-    }
 
     @Override
     public Long saveWithoutTags(Post post) {
