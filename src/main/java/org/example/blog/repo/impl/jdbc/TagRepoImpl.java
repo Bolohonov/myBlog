@@ -3,13 +3,10 @@ package org.example.blog.repo.impl.jdbc;
 import lombok.RequiredArgsConstructor;
 import org.example.blog.model.Tag;
 import org.example.blog.repo.TagRepo;
-import org.example.blog.utils.SqlUtils;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
