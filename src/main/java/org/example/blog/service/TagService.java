@@ -6,6 +6,7 @@ import org.example.blog.api.response.TagResponse;
 import org.example.blog.model.Tag;
 import org.example.blog.repo.TagRepo;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -16,6 +17,7 @@ public class TagService {
     private final TagRepo tagRepo;
     private final TagMapper tagMapper;
 
+    @Transactional
     public Set<Tag> save(String tags) {
         Set<String> tagsFrom = Arrays.stream(tags.split(","))
                 .map(String::trim)
@@ -33,5 +35,10 @@ public class TagService {
     public Map<Long, List<Tag>> getByPostIds(List<Long> postIds) {
         List<Tag> tags = tagRepo.findByPostIds(postIds);
         return tags.stream().collect(Collectors.groupingBy(Tag::getPostId));
+    }
+
+    @Transactional
+    public void batchUpdateByPostId(Long postId, Set<Tag> tags) {
+        tagRepo.batchUpdateByPostId(postId, tags);
     }
 }

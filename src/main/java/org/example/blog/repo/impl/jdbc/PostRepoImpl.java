@@ -16,18 +16,18 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 @Repository
 public class PostRepoImpl implements PostRepo {
-    private static final int MAX_BATCH_SIZE = 500;
 
     private static final String SAVE_QUERY = """
             INSERT INTO POSTS (title, content, image) VALUES (?, ?, ?) RETURNING ID
             """;
-    public static final String COUNT_POSTS = "SELECT COUNT(DISTINCT P.id) FROM POSTS P";
+    private static final String COUNT_POSTS = "SELECT COUNT(DISTINCT P.id) FROM POSTS P";
     private static final String FIND_ALL = """
             SELECT DISTINCT P.*
             FROM POSTS P
@@ -37,17 +37,15 @@ public class PostRepoImpl implements PostRepo {
             """;
 
     private static final String UPDATE_QUERY = """ 
-    UPDATE posts SET title = :title, content = :content, image = :image WHERE id = :postId
-    """;
-    private static final String SAVE_POST_TAGS = """
-    INSERT INTO posts_tags (post_id, tag_id) VALUES (?, ?)
-    """;
-
-    public static final String FIND_BY_ID = """
+            UPDATE posts SET title = :title, content = :content, image = :image WHERE id = :postId
+            """;
+    private static final String FIND_BY_ID = """
             SELECT P.*
             FROM POSTS P
             WHERE P.id = ?
             """;
+
+    private static final String DELETE_BY_ID = "DELETE FROM POSTS P WHERE P.id = ?";
 
     private final JdbcTemplate template;
 
@@ -56,35 +54,34 @@ public class PostRepoImpl implements PostRepo {
     }
 
     @Override
-    public void save(Post post) {
-
+    public Long saveWithoutTags(Post post) {
+        try {
+            return template.queryForObject(
+                    SAVE_QUERY,
+                    new Object[]{post.getTitle(), post.getContent(), post.getImage()},
+                    Long.class
+            );
+        } catch (EmptyResultDataAccessException exp) {
+            return null;
+        }
     }
 
     @Override
     public Post getById(Long id) {
         return template.queryForObject(
                 FIND_BY_ID,
-                (rs, rowNum) ->
-                        new Post(
-                                rs.getLong("id"),
-                                rs.getString("title"),
-                                rs.getString("content"),
-                                rs.getBytes("image"),
-                                rs.getTimestamp("created_at").toLocalDateTime(),
-                                rs.getTimestamp("updated_at").toLocalDateTime()
-                        ),
+                this::mapToPost,
                 id
         );
     }
 
     @Override
     public void deleteById(Long id) {
-
+        template.update(DELETE_BY_ID, id);
     }
 
     @Override
-    @Transactional
-    public void update(Post post) {
+    public void updateWithoutTags(Post post) {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("title", post.getTitle())
                 .addValue("content", post.getContent())
@@ -93,41 +90,16 @@ public class PostRepoImpl implements PostRepo {
         template.update(
                 UPDATE_QUERY, params
         );
-        List<Long> tagIds = post.getTags().stream().map(Tag::getId).toList();
-        int i = 1;
-        while(i != tagIds.size() / MAX_BATCH_SIZE + 2) {
-            template.batchUpdate(
-                    SAVE_POST_TAGS,
-                    new BatchPreparedStatementSetter() {
-                        public void setValues(PreparedStatement ps, int i) throws SQLException {
-                            ps.setLong(1, post.getId());
-                            ps.setLong(2, tagIds.get(i));
-                        }
-                        public int getBatchSize() {
-                            return post.getTags().size();
-                        }
-                    });
-            i++;
-        }
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<Post> findAll(Pageable pageable) {
         int limit = pageable.getPageSize();
         int offset = pageable.getPageNumber() * limit;
 
         List<Post> posts = template.query(
                 FIND_ALL,
-                (rs, rowNum) ->
-                        new Post(
-                                SqlUtils.getLong(rs, "id"),
-                                SqlUtils.getStringOrElseEmpty(rs, "title"),
-                                SqlUtils.getStringOrElseEmpty(rs, "content"),
-                                rs.getBytes("image"),
-                                SqlUtils.getLocalDateTime(rs, "created"),
-                                SqlUtils.getLocalDateTime(rs, "updated")
-                        ),
+                this::mapToPost,
                 limit,
                 offset
         );
@@ -138,5 +110,16 @@ public class PostRepoImpl implements PostRepo {
             size = 0;
         }
         return new PageImpl<>(posts, pageable, size);
+    }
+
+    Post mapToPost(ResultSet rs, int rowNumber) throws SQLException {
+        return new Post(
+                SqlUtils.getLong(rs, "id"),
+                SqlUtils.getStringOrElseEmpty(rs, "title"),
+                SqlUtils.getStringOrElseEmpty(rs, "content"),
+                rs.getBytes("image"),
+                SqlUtils.getLocalDateTime(rs, "created"),
+                SqlUtils.getLocalDateTime(rs, "updated")
+        );
     }
 }

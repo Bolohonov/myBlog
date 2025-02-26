@@ -9,6 +9,7 @@ import java.util.Set;
 @Repository
 public interface TagRepo {
     List<Tag> save(List<Tag> tags);
+    void batchUpdateByPostId(Long postId, Set<Tag> tags);
     List<Tag> getOrCreate(Set<String> tagNames);
     List<Tag> findAll();
     List<Tag> findByPostIds(List<Long> postIds);

@@ -13,12 +13,10 @@ import org.example.blog.repo.PostRepo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -29,8 +27,11 @@ public class PostService {
     private final LikeService likeService;
     private final TagService tagService;
 
+    @Transactional
     public void save(PostRequest request) {
-        postRepo.save(postMapper.toPost(request));
+        Post post = postMapper.toPost(request);
+        Long postId = postRepo.saveWithoutTags(post);
+        tagService.batchUpdateByPostId(postId, post.getTags());
     }
 
     public PostResponse getById(Long id) {
@@ -41,12 +42,14 @@ public class PostService {
         postRepo.deleteById(id);
     }
 
+    @Transactional
     public void update(Long id, PostRequest request) {
         Post post = postRepo.getById(id);
         post.setTitle(request.getTitle());
         post.setContent(request.getContent());
         post.setTags(tagService.save(request.getTags()));
-        postRepo.update(post);
+        postRepo.updateWithoutTags(post);
+        tagService.batchUpdateByPostId(post.getId(), post.getTags());
     }
 
     public void addComment(Long id, CommentRequest comment) {
@@ -67,6 +70,7 @@ public class PostService {
         likeService.addLike(postRepo.getById(id));
     }
 
+    @Transactional(readOnly = true)
     public Page<PostResponse> getPosts(Pageable pageable) {
         Page<Post> posts = postRepo.findAll(pageable);
         List<Long> postIds = posts.stream().map(Post::getId).toList();
