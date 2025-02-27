@@ -1,10 +1,13 @@
 package org.example.blog.repo.impl.jdbc;
 
 import lombok.RequiredArgsConstructor;
+import org.example.blog.model.Post;
 import org.example.blog.model.Tag;
 import org.example.blog.repo.TagRepo;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -36,6 +39,13 @@ public class TagRepoImpl implements TagRepo {
             SELECT T.*
             FROM TAGS T
             WHERE LOWER(T.name) IN (%s)
+            """;
+
+    private static final String FIND_BY_POST_IDS = """
+            SELECT t.*, pt.post_id as post_id
+            FROM tags t
+            JOIN posts_tags pt ON pt.tag_id = t.id
+            WHERE pt.post_id IN (%s)
             """;
 
     private final JdbcTemplate template;
@@ -114,12 +124,23 @@ public class TagRepoImpl implements TagRepo {
 
     @Override
     public List<Tag> findAll() {
-        return List.of();
+        return template.query(
+                "select id, name from tags",
+                (rs, rowNum) -> new Tag(
+                        rs.getLong("id"),
+                        rs.getString("name")
+                )
+        );
     }
 
     @Override
     public List<Tag> findByPostIds(List<Long> postIds) {
-        return List.of();
+        String inSql = String.join(",", Collections.nCopies(postIds.size(), "?"));
+        return template.query(
+                String.format(FIND_BY_POST_IDS, inSql),
+                this::mapToTagWithPostId,
+                postIds.toArray()
+        );
     }
 
     private List<Tag> findByNameInIgnoreCase(Set<String> tagNames) {
@@ -137,5 +158,12 @@ public class TagRepoImpl implements TagRepo {
             return null;
         }
         return new Tag(rs.getLong("id"), rs.getString("name"));
+    }
+
+    private Tag mapToTagWithPostId(ResultSet rs, int rowNumber) throws SQLException {
+        if (rs.getString("name") == null) {
+            return null;
+        }
+        return new Tag(rs.getLong("id"), rs.getString("name"), rs.getLong("post_id"));
     }
 }
