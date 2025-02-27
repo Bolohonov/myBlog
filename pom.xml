@@ -90,7 +90,7 @@
   </dependencies>
 
   <build>
-    <finalName>my-blog</finalName>
+    <finalName>practicum-blog</finalName>
     <pluginManagement>
       <plugins>
         <plugin>
