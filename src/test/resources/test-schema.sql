@@ -1,6 +1,6 @@
 create table if not exists posts
 (
-    id         bigserial GENERATED ALWAYS AS IDENTITY primary key,
+    id         bigserial primary key,
     title      varchar(255) not null,
     content    text         not null,
     image      bytea,

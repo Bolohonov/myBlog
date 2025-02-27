@@ -10,17 +10,22 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 @RequiredArgsConstructor
 public class PostRepoImpl implements PostRepo {
     private static final String SAVE_QUERY = """
-            INSERT INTO POSTS (title, content, image) VALUES (?, ?, ?) RETURNING ID
+            INSERT INTO POSTS (title, content, image) VALUES (?, ?, ?)
             """;
     private static final String COUNT_POSTS = "SELECT COUNT(DISTINCT P.id) FROM POSTS P";
     private static final String FIND_ALL = """
@@ -46,15 +51,22 @@ public class PostRepoImpl implements PostRepo {
 
     @Override
     public Long saveWithoutTags(Post post) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
         try {
-            return template.queryForObject(
-                    SAVE_QUERY,
-                    new Object[]{post.getTitle(), post.getContent(), post.getImage()},
-                    Long.class
+            template.update(
+                    connection -> {
+                        PreparedStatement ps = connection.prepareStatement(SAVE_QUERY, Statement.RETURN_GENERATED_KEYS);
+                        ps.setString(1, post.getTitle());
+                        ps.setString(2, post.getContent());
+                        ps.setBytes(3, post.getImage());
+                        return ps;
+                    },
+                    keyHolder
             );
         } catch (EmptyResultDataAccessException exp) {
             return null;
         }
+        return (Long) Objects.requireNonNull(keyHolder.getKeys()).get("id");
     }
 
     @Override
