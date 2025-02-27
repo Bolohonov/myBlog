@@ -50,21 +50,21 @@ public class PostControllerTest {
                 .andExpect(status().isOk());
     }
 
-//    @Test
-//    @Sql({
-//            "sql/posts.sql",
-//            "sql/tags.sql"
-//    })
-//    void savePost_shouldSavePost() throws Exception {
-//        mockMvc.perform(post("/api/blog/post")
-//                        .param("title", "title")
-//                        .param("content", "content")
-//                        .param("tags", "tag1,tag2,tag3")
-//                        .content(new byte[]{1, 2, 3})
-//                        .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
-//                )
-//                .andExpect(status().is3xxRedirection());
-//    }
+    @Test
+    @Sql({
+            "sql/posts.sql",
+            "sql/tags.sql"
+    })
+    void savePost_shouldSavePost() throws Exception {
+        mockMvc.perform(post("/api/blog/post")
+                        .param("title", "title")
+                        .param("content", "content")
+                        .param("tags", "tag1,tag2,tag3")
+                        .content(new byte[]{1, 2, 3})
+                        .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+                )
+                .andExpect(status().is3xxRedirection());
+    }
 
     @Test
     @Sql({"sql/posts.sql",
@@ -88,10 +88,10 @@ public class PostControllerTest {
     @Sql({"sql/posts.sql",
             "sql/tags.sql"})
     void updatePost_shouldUpdatePost() throws Exception {
-        mockMvc.perform(put("/api/blog/post/4/edit")
+        mockMvc.perform(put("/api/blog/post/4/update")
                         .param("title", "newTitle")
                         .param("content", "newContent")
-                        .param("tags", "tag1,tag3")
+                        .param("tags", "Тег1,Тег3")
                         .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
                 )
                 .andExpect(status().is3xxRedirection());

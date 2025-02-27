@@ -3,14 +3,19 @@ package org.example.blog.repo.impl.jdbc;
 import lombok.RequiredArgsConstructor;
 import org.example.blog.model.Tag;
 import org.example.blog.repo.TagRepo;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -23,7 +28,9 @@ public class TagRepoImpl implements TagRepo {
             INSERT INTO posts_tags (post_id, tag_id) VALUES (?, ?)
             """;
 
-    private static final String SAVE_TAGS = "INSERT INTO TAGS (name) VALUES (?) RETURNING ID";
+    private static final String SAVE_TAGS = """ 
+    INSERT INTO TAGS (name) VALUES (?)
+    """;
 
     private static final String FIND_BY_NAME_QUERY = """
             SELECT T.*
@@ -36,18 +43,23 @@ public class TagRepoImpl implements TagRepo {
     @Override
     public List<Tag> save(List<Tag> tags) {
         for (Tag tag : tags) {
-            Long tagId;
+            KeyHolder keyHolder = new GeneratedKeyHolder();
             try {
-                tagId = template.queryForObject(
-                        SAVE_TAGS,
-                        new Object[]{tag.getName()},
-                        Long.class
+                template.update(
+                        connection -> {
+                            PreparedStatement ps = connection.prepareStatement(SAVE_TAGS,
+                                    Statement.RETURN_GENERATED_KEYS);
+                            ps.setString(1, tag.getName());
+                            return ps;
+                        },
+                        keyHolder
                 );
+                Long tagId = (long) Objects.requireNonNull(keyHolder.getKeys()).get("id");
+                tag.setId(tagId);
+
             } catch (EmptyResultDataAccessException exp) {
                 return null;
-            }
-            if (tagId != null) {
-                tag.setId(tagId);
+            } catch (DuplicateKeyException e) {
             }
         }
         return tags;
@@ -55,27 +67,31 @@ public class TagRepoImpl implements TagRepo {
 
     @Override
     public void batchUpdateByPostId(Long postId, Set<Tag> tags) {
-        final List<Long> tagIds = tags.stream().map(Tag::getId).toList();
-        List<Long> ids = new ArrayList<>(tagIds);
-        int i = 1;
-        while (i != tagIds.size() / MAX_BATCH_SIZE + 2) {
-            List<Long> finalIds = ids;
-            template.batchUpdate(
-                    SAVE_POST_TAGS,
-                    new BatchPreparedStatementSetter() {
-                        public void setValues(PreparedStatement ps, int i) throws SQLException {
-                            ps.setLong(1, postId);
-                            ps.setLong(2, finalIds.get(i));
-                        }
+        if (!CollectionUtils.isEmpty(tags)) {
+            final List<Long> tagIds = tags.stream().map(Tag::getId).toList();
+            List<Long> ids = new ArrayList<>(tagIds).stream().filter(Objects::nonNull).toList();
+            int i = 1;
+            while (i != tagIds.size() / MAX_BATCH_SIZE + 2) {
+                List<Long> finalIds = ids;
+                if (!CollectionUtils.isEmpty(finalIds)) {
+                    template.batchUpdate(
+                            SAVE_POST_TAGS,
+                            new BatchPreparedStatementSetter() {
+                                public void setValues(PreparedStatement ps, int i) throws SQLException {
+                                    ps.setLong(1, postId);
+                                    ps.setLong(2, finalIds.get(i));
+                                }
 
-                        public int getBatchSize() {
-                            return MAX_BATCH_SIZE;
-                        }
-                    });
-            if (ids.size() > MAX_BATCH_SIZE) {
-                ids = ids.subList(0, MAX_BATCH_SIZE);
+                                public int getBatchSize() {
+                                    return finalIds.size();
+                                }
+                            });
+                }
+                if (ids.size() > MAX_BATCH_SIZE) {
+                    ids = ids.subList(0, MAX_BATCH_SIZE);
+                }
+                i++;
             }
-            i++;
         }
     }
 

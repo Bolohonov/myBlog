@@ -37,7 +37,7 @@ public class PostRepoImpl implements PostRepo {
             """;
 
     private static final String UPDATE_QUERY = """ 
-            UPDATE posts SET title = :title, content = :content, image = :image WHERE id = :postId
+            UPDATE posts SET title = ?, content = ?, image = ? WHERE id = ?
             """;
     private static final String FIND_BY_ID = """
             SELECT P.*
@@ -85,13 +85,9 @@ public class PostRepoImpl implements PostRepo {
 
     @Override
     public void updateWithoutTags(Post post) {
-        MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("title", post.getTitle())
-                .addValue("content", post.getContent())
-                .addValue("image", post.getImage())
-                .addValue("id", post.getId());
+        System.out.println("UPDATE");
         template.update(
-                UPDATE_QUERY, params
+                UPDATE_QUERY, post.getTitle(), post.getContent(), post.getImage(), post.getId()
         );
     }
 
