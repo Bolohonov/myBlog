@@ -53,7 +53,7 @@ public class CommentRepoImpl implements CommentRepo {
         return Comment.builder()
                 .id(SqlUtils.getLong(rs, "id"))
                 .postId(SqlUtils.getLong(rs, "post_id"))
-                .text(SqlUtils.getStringOrElseEmpty(rs, "text"))
+                .text(SqlUtils.getStringOrElseEmpty(rs, "content"))
                 .created(SqlUtils.getLocalDateTime(rs, "created"))
                 .created(SqlUtils.getLocalDateTime(rs, "updated"))
                 .build();
